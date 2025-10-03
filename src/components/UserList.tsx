@@ -7,6 +7,7 @@ export default function UserList() {
   const { users, addUser } = useUsers();
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"none" | "asc" | "desc">("none");
 
   const filtered = users.filter((u) => {
     const res = search.trim().toLowerCase();
@@ -15,6 +16,16 @@ export default function UserList() {
         u.name.toLowerCase().includes(res) || u.email.toLowerCase().includes(res)
       );
   });
+
+  const handleSort = () => {
+    setSortOrder((prev) =>
+      prev === "none" ? "asc" : prev === "asc" ? "desc" : "none"
+    );
+  };
+
+  const sorted = sortOrder === "none" ? filtered : [...filtered].sort((a, b) =>
+        sortOrder === "asc" ? a.name.localeCompare(b.name): b.name.localeCompare(a.name));
+
 
   return (
     <div className="p-6">
@@ -54,13 +65,21 @@ export default function UserList() {
         <table className="min-w-full border border-gray-200">
           <thead className="bg-gray-100 border-b border-gray-200">
             <tr>
-              <th className="text-center px-4 py-2">Name</th>
+              <th
+                onClick={handleSort}
+                className="text-center px-4 py-2 cursor-pointer hover:bg-gray-200 select-none"
+              >
+                Name{" "}
+                {sortOrder === "none" && "↑↓"}
+                {sortOrder === "asc" && "↑"}
+                {sortOrder === "desc" && "↓"}
+              </th>
               <th className="text-center px-4 py-2">Email</th>
               <th className="text-center px-4 py-2">Company</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((user) => (
+            {sorted.map((user) => (
               <tr key={user.id} className="hover:bg-gray-100 border-b border-gray-200">
                 <td colSpan={3} className="p-0">
                   <Link
@@ -77,7 +96,7 @@ export default function UserList() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td colSpan={3} className="text-center px-4 py-2">
                   No users match your search.
